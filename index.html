@@ -1,26 +1,50 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Black Tide</title><style>html,body{margin:0;height:100%;overflow:hidden;background:#071426}canvas{width:100vw;height:100vh;display:block;image-rendering:pixelated;touch-action:none}</style></head><body><canvas id="game"></canvas><script>
-const c=document.getElementById("game"),x=c.getContext("2d");c.width=320;c.height=240;
-let p={x:160,y:185,compass:false,clue:false,atk:0},msg="Wake up, castaway. Find the compass.",keys={},joy={on:false,x:55,y:185,dx:0,dy:0};
-let compass={x:145,y:190,taken:false},elias={x:210,y:165},light={x:250,y:60},crab={x:110,y:120,hp:3};
-onkeydown=e=>{keys[e.key.toLowerCase()]=1;if(e.key==" ")attack();if(e.key.toLowerCase()=="e")act()};
-onkeyup=e=>keys[e.key.toLowerCase()]=0;
-function d(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
-function say(t){msg=t}
-function attack(){p.atk=10;if(crab.hp>0&&d(p,crab)<30){crab.hp--;if(crab.hp<=0)say("The crab explodes into sea foam. Weird crab.")}}
-function act(){if(!compass.taken&&d(p,compass)<24){compass.taken=1;p.compass=1;say("You found the compass. It does not point north.")}else if(d(p,elias)<28){say("Elias: Lighthouse went dark last night. Go check it.")}else if(d(p,light)<40){if(!p.compass)say("The lighthouse feels important, but something is missing.");else{p.clue=1;say("FIRST CLUE FOUND: FLAME.")}}}
-function solid(nx,ny){return nx<15||ny<20||nx>305||ny>225||(nx>55&&nx<115&&ny>65&&ny<150)||(nx>238&&nx<268&&ny>30&&ny<95)}
-function update(){let dx=0,dy=0;if(keys.a||keys.arrowleft)dx--;if(keys.d||keys.arrowright)dx++;if(keys.w||keys.arrowup)dy--;if(keys.s||keys.arrowdown)dy++;dx+=joy.dx;dy+=joy.dy;let m=Math.hypot(dx,dy);if(m>1){dx/=m;dy/=m}let nx=p.x+dx*1.5,ny=p.y+dy*1.5;if(!solid(nx,p.y))p.x=nx;if(!solid(p.x,ny))p.y=ny;if(p.atk>0)p.atk--;if(crab.hp>0&&d(p,crab)<60){crab.x+=(p.x-crab.x)/d(p,crab)*.25;crab.y+=(p.y-crab.y)/d(p,crab)*.25}}
-function island(){x.fillStyle="#1262b3";x.fillRect(0,0,320,240);x.fillStyle="#d8bd78";x.beginPath();x.ellipse(160,140,130,90,0,0,7);x.fill();x.fillStyle="#3fa34d";x.beginPath();x.ellipse(160,135,105,65,0,0,7);x.fill();x.fillStyle="#d8bd78";x.beginPath();x.ellipse(160,195,80,30,0,0,7);x.fill();x.fillStyle="#98633a";x.fillRect(145,120,28,70);x.fillRect(112,155,90,18);for(let yy=70;yy<145;yy+=16)for(let xx=65;xx<110;xx+=16)tree(xx,yy);dock();lighthouse()}
-function tree(a,b){x.fillStyle="#6b3e1f";x.fillRect(a-2,b+5,4,10);x.fillStyle="#146b30";x.beginPath();x.arc(a,b,9,0,7);x.fill()}
-function dock(){x.fillStyle="#6b3e1f";x.fillRect(150,205,25,35);x.fillStyle="#3b2110";for(let i=0;i<35;i+=8)x.fillRect(150,205+i,25,2)}
-function lighthouse(){x.fillStyle="#eee";x.fillRect(240,40,20,55);x.fillStyle="#b44";x.fillRect(238,52,24,6);x.fillRect(238,72,24,6);x.fillStyle=p.clue?"#ffe27a":"#444";x.fillRect(236,28,28,14)}
-function person(a,b,col){x.fillStyle="#f0c08c";x.fillRect(a-4,b-12,8,8);x.fillStyle=col;x.fillRect(a-5,b-4,10,13);x.fillStyle="#222";x.fillRect(a-5,b+9,4,6);x.fillRect(a+1,b+9,4,6)}
-function draw(){x.clearRect(0,0,320,240);island();if(!compass.taken){x.fillStyle="#d8a535";x.beginPath();x.arc(compass.x,compass.y,7,0,7);x.fill()}person(elias.x,elias.y,"#2c5b92");if(crab.hp>0){x.fillStyle="#c74332";x.fillRect(crab.x-8,crab.y-4,16,8);x.fillRect(crab.x-13,crab.y-2,5,3);x.fillRect(crab.x+8,crab.y-2,5,3)}person(p.x,p.y,"#7a3d21");x.fillStyle="#ddd";x.fillRect(p.x+5,p.y-3,3,13);if(p.atk){x.strokeStyle="#fff";x.lineWidth=3;x.beginPath();x.arc(p.x,p.y,20,-.7,.7);x.stroke()}ui();dialog()}
-function ui(){x.fillStyle="rgba(0,0,0,.55)";x.fillRect(6,6,150,42);x.fillStyle="#fff";x.font="9px monospace";x.fillText("BLACK TIDE 0.1",14,18);x.fillText("Compass: "+(p.compass?"YES":"NO"),14,31);x.fillText("Clue: "+(p.clue?"FLAME":"—"),14,43);x.globalAlpha=.55;x.strokeStyle="#fff";x.beginPath();x.arc(55,185,32,0,7);x.stroke();x.beginPath();x.arc(55+joy.dx*25,185+joy.dy*25,12,0,7);x.stroke();x.beginPath();x.arc(270,182,24,0,7);x.stroke();x.fillText("ATK",260,185);x.beginPath();x.arc(230,205,22,0,7);x.stroke();x.fillText("ACT",220,208);x.globalAlpha=1}
-function dialog(){x.fillStyle="rgba(0,0,0,.78)";x.fillRect(12,170,296,55);x.strokeStyle="#fff";x.strokeRect(12,170,296,55);x.fillStyle="#fff";x.font="10px monospace";let words=msg.split(" "),line="",y=190;for(let w of words){if((line+w).length>34){x.fillText(line,24,y);line=w+" ";y+=13}else line+=w+" "}x.fillText(line,24,y)}
-function loop(){update();draw();requestAnimationFrame(loop)}loop();
-function pos(t){let r=c.getBoundingClientRect();return{x:(t.clientX-r.left)*320/r.width,y:(t.clientY-r.top)*240/r.height,id:t.identifier}}
-c.ontouchstart=e=>{e.preventDefault();for(let t of e.changedTouches){let q=pos(t);if(q.x<160){joy.on=q.id;joy.x=q.x;joy.y=q.y}if(Math.hypot(q.x-270,q.y-182)<30)attack();if(Math.hypot(q.x-230,q.y-205)<30)act()}};
-c.ontouchmove=e=>{e.preventDefault();for(let t of e.touches){let q=pos(t);if(q.id===joy.on){let dx=q.x-joy.x,dy=q.y-joy.y,m=Math.hypot(dx,dy),max=30;if(m>max){dx=dx/m*max;dy=dy/m*max}joy.dx=dx/max;joy.dy=dy/max}}};
-c.ontouchend=e=>{for(let t of e.changedTouches)if(t.identifier===joy.on){joy.on=false;joy.dx=joy.dy=0}};
-</script></body></html>
+from textwrap import dedent
+import os
+
+html = r'''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Black Tide 0.2</title><style>
+html,body{margin:0;height:100%;overflow:hidden;background:#061426}canvas{width:100vw;height:100vh;display:block;image-rendering:pixelated;touch-action:none}
+</style></head><body><canvas id="game"></canvas><script>
+const c=document.getElementById("game"),g=c.getContext("2d");c.width=320;c.height=240;
+let keys={},msg=["Wake up, castaway.","Find the compass. Talk to Elias. Reach the lighthouse."],mi=0,fade=0;
+let p={x:160,y:370,comp:false,clue:false,atk:0,hp:3,face:"down"},cam={x:0,y:0};
+let joy={id:null,x:55,y:185,dx:0,dy:0},t=0;
+const npcs=[{name:"Elias",x:205,y:330,c:"#2d65a3"}],items=[{x:150,y:375,type:"compass",got:false},{x:312,y:122,type:"clue",got:false}];
+const crabs=[{x:120,y:270,hp:3},{x:285,y:255,hp:3},{x:225,y:185,hp:3}];
+const rocks=[[90,215],[260,305],[180,205],[330,260]],palms=[[70,250],[90,270],[75,300],[360,205],[390,230],[345,150],[115,165],[55,330],[390,350]];
+onkeydown=e=>{keys[e.key.toLowerCase()]=1;if(e.key==" ")atk();if(e.key.toLowerCase()=="e")act()};onkeyup=e=>keys[e.key.toLowerCase()]=0;
+function D(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}function say(a){msg=Array.isArray(a)?a:[a];mi=0}
+function solid(x,y){if(x<28||y<30||x>420||y>430)return 1;for(let r of rocks)if(Math.hypot(x-r[0],y-r[1])<14)return 1;if(x>292&&x<333&&y>75&&y<145)return 1;return 0}
+function atk(){if(msg[mi]&&fade>0)return;p.atk=10;for(let e of crabs)if(e.hp>0&&D(p,e)<32){e.hp--;if(e.hp<=0)say("The crab dissolves into sea foam. Still weird.")}}
+function act(){if(msg[mi]&&fade>0){mi++;if(mi>=msg.length)fade=0;return}
+for(let it of items){if(!it.got&&it.type=="compass"&&D(p,it)<22){it.got=1;p.comp=1;say(["You found the compass.","It shivers like it remembers the sea."]);return}}
+if(D(p,npcs[0])<28){say(["Elias: Easy now. Storm nearly took you.","Elias: That compass is old. Older than any map.","Elias: Lighthouse went dark. If it wakes for you, run toward the truth."]);return}
+if(Math.hypot(p.x-312,p.y-115)<42){if(!p.comp)say("The lighthouse waits, but the compass is missing.");else{p.clue=1;say(["The lens catches the compass light.","A hidden panel opens.","FIRST CLUE FOUND: FLAME."])}}}
+function upd(){t++;let dx=0,dy=0;if(keys.a||keys.arrowleft)dx--;if(keys.d||keys.arrowright)dx++;if(keys.w||keys.arrowup)dy--;if(keys.s||keys.arrowdown)dy++;dx+=joy.dx;dy+=joy.dy;let m=Math.hypot(dx,dy);if(m>1){dx/=m;dy/=m}if(dx<-.2)p.face="left";if(dx>.2)p.face="right";if(dy<-.2)p.face="up";if(dy>.2)p.face="down";if(!fade){let nx=p.x+dx*1.55,ny=p.y+dy*1.55;if(!solid(nx,p.y))p.x=nx;if(!solid(p.x,ny))p.y=ny}if(p.atk>0)p.atk--;
+for(let e of crabs)if(e.hp>0&&!fade){let d=D(p,e);if(d<75){let nx=e.x+(p.x-e.x)/d*.22,ny=e.y+(p.y-e.y)/d*.22;if(!solid(nx,ny)){e.x=nx;e.y=ny}}}
+cam.x=Math.max(0,Math.min(p.x-160,160));cam.y=Math.max(0,Math.min(p.y-120,220));}
+function world(){g.fillStyle="#0b5da8";g.fillRect(0,0,320,240);for(let i=0;i<22;i++){g.fillStyle="rgba(255,255,255,.12)";g.fillRect((i*37+t/3)%360-30,((i*53)%240),18,1)}
+let X=-cam.x,Y=-cam.y;g.fillStyle="#d9be76";g.beginPath();g.ellipse(225+X,235+Y,210,195,0,0,7);g.fill();g.fillStyle="#43a957";g.beginPath();g.ellipse(225+X,230+Y,168,145,0,0,7);g.fill();g.fillStyle="#d9be76";g.beginPath();g.ellipse(205+X,382+Y,130,48,0,0,7);g.fill();
+path(210,165,210,375);path(125,320,285,320);dock(192+X,395+Y);for(let q of palms)palm(q[0]+X,q[1]+Y);for(let r of rocks)rock(r[0]+X,r[1]+Y);house(98+X,315+Y);house(250+X,330+Y);light(312+X,105+Y)}
+function path(x1,y1,x2,y2){g.strokeStyle="#9c6a3e";g.lineWidth=18;g.beginPath();g.moveTo(x1-cam.x,y1-cam.y);g.lineTo(x2-cam.x,y2-cam.y);g.stroke()}
+function dock(x,y){g.fillStyle="#70421f";g.fillRect(x,y,28,55);g.fillStyle="#3b2110";for(let i=0;i<55;i+=8)g.fillRect(x,y+i,28,2)}
+function palm(x,y){g.fillStyle="#6b3e1f";g.fillRect(x-3,y+5,6,20);g.fillStyle="#126b32";for(let a=0;a<6;a++){g.beginPath();g.ellipse(x+Math.cos(a)*8,y+Math.sin(a)*5,13,5,a,0,7);g.fill()}}
+function rock(x,y){g.fillStyle="#777";g.fillRect(x-10,y-7,20,14);g.fillStyle="#aaa";g.fillRect(x-6,y-6,8,3)}
+function house(x,y){g.fillStyle="#8a4d2a";g.fillRect(x-18,y-10,36,28);g.fillStyle="#56311e";g.fillRect(x-22,y-18,44,12);g.fillStyle="#17110b";g.fillRect(x-5,y+2,10,16)}
+function light(x,y){g.fillStyle="#eee";g.fillRect(x-10,y-30,20,65);g.fillStyle="#bd4542";g.fillRect(x-12,y-12,24,7);g.fillRect(x-12,y+12,24,7);g.fillStyle=p.clue?"#ffe47a":"#444";g.fillRect(x-15,y-45,30,16);if(p.clue){g.fillStyle="rgba(255,228,122,.25)";g.beginPath();g.arc(x,y-38,55,0,7);g.fill()}}
+function person(x,y,col){x-=cam.x;y-=cam.y;g.fillStyle="#f0bd86";g.fillRect(x-4,y-12,8,8);g.fillStyle=col;g.fillRect(x-6,y-4,12,14);g.fillStyle="#111";g.fillRect(x-6,y+10,5,7);g.fillRect(x+1,y+10,5,7)}
+function crab(e){if(e.hp<=0)return;let x=e.x-cam.x,y=e.y-cam.y;g.fillStyle="#c74332";g.fillRect(x-8,y-4,16,8);g.fillRect(x-14,y-2,6,3);g.fillRect(x+8,y-2,6,3);g.fillStyle="#111";g.fillRect(x-4,y-2,2,2);g.fillRect(x+3,y-2,2,2)}
+function comp(x,y){g.fillStyle="#d8a535";g.beginPath();g.arc(x-cam.x,y-cam.y,7,0,7);g.fill();g.strokeStyle="#3a250d";g.stroke();g.fillStyle="#a22";g.fillRect(x-cam.x-1,y-cam.y-5,2,10)}
+function draw(){g.clearRect(0,0,320,240);world();for(let it of items)if(!it.got&&it.type=="compass")comp(it.x,it.y);person(npcs[0].x,npcs[0].y,npcs[0].c);for(let e of crabs)crab(e);person(p.x,p.y,"#7a3d21");let sx=p.x-cam.x,sy=p.y-cam.y;g.fillStyle="#ddd";g.fillRect(sx+5,sy-3,3,13);if(p.atk){g.strokeStyle="#fff";g.lineWidth=3;g.beginPath();g.arc(sx,sy,21,-.7,.7);g.stroke()}ui();if(fade||msg[mi])box()}
+function ui(){g.fillStyle="rgba(0,0,0,.55)";g.fillRect(6,6,145,42);g.fillStyle="#fff";g.font="9px monospace";g.fillText("BLACK TIDE 0.2",14,18);g.fillText("Compass: "+(p.comp?"YES":"NO"),14,31);g.fillText("Clue: "+(p.clue?"FLAME":"—"),14,43);g.globalAlpha=.5;g.strokeStyle="#fff";g.beginPath();g.arc(55,185,32,0,7);g.stroke();g.beginPath();g.arc(55+joy.dx*25,185+joy.dy*25,12,0,7);g.stroke();g.beginPath();g.arc(270,182,24,0,7);g.stroke();g.fillText("ATK",260,185);g.beginPath();g.arc(230,205,22,0,7);g.stroke();g.fillText("ACT",220,208);g.globalAlpha=1}
+function box(){fade=1;g.fillStyle="rgba(0,0,0,.80)";g.fillRect(12,170,296,55);g.strokeStyle="#fff";g.strokeRect(12,170,296,55);g.fillStyle="#fff";g.font="10px monospace";let s=msg[mi]||"",w=s.split(" "),line="",y=190;for(let a of w){if((line+a).length>35){g.fillText(line,24,y);line=a+" ";y+=13}else line+=a+" "}g.fillText(line,24,y);g.fillText("tap ACT",258,218)}
+function loop(){upd();draw();requestAnimationFrame(loop)}loop();
+function pos(e){let r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*320/r.width,y:(e.clientY-r.top)*240/r.height,id:e.identifier}}
+c.ontouchstart=e=>{e.preventDefault();for(let q of e.changedTouches){let a=pos(q);if(a.x<160){joy.id=a.id;joy.x=a.x;joy.y=a.y}if(Math.hypot(a.x-270,a.y-182)<30)atk();if(Math.hypot(a.x-230,a.y-205)<30)act()}};
+c.ontouchmove=e=>{e.preventDefault();for(let q of e.touches){let a=pos(q);if(a.id===joy.id){let dx=a.x-joy.x,dy=a.y-joy.y,m=Math.hypot(dx,dy),mx=30;if(m>mx){dx=dx/m*mx;dy=dy/m*mx}joy.dx=dx/mx;joy.dy=dy/mx}}};
+c.ontouchend=e=>{for(let q of e.changedTouches)if(q.identifier===joy.id){joy.id=null;joy.dx=joy.dy=0}};
+</script></body></html>'''
+
+path="/mnt/data/black_tide_index_0_2.html"
+with open(path,"w",encoding="utf-8") as f:f.write(html)
+print(path)
+print(len(html))
